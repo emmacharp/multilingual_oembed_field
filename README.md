@@ -8,11 +8,13 @@ Version: 1.0.x
 
 ### SPECS ###
 
-- The same as the [original extension](https://github.com/Solutions-Nitriques/oembed_field).
+- The same as the [original extension](https://github.com/Solutions-Nitriques/oembed_field#specs).
 
 ### REQUIREMENTS ###
 
 - Symphony CMS version 2.5.0 and up (as of the day of the last release of this extension)
+- [oEmbed Field](https://github.com/Solutions-Nitriques/oembed_field) version 1.8.8 and up
+- [Frontend Localisation](https://github.com/DeuxHuitHuit/frontend_localisation) 2.5 and up
 
 ### INSTALLATION ###
 
