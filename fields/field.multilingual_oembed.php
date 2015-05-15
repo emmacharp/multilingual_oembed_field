@@ -479,13 +479,7 @@
 					'title' => empty($data["title-$lc"]) ? $data['title'] : $data["title-$lc"],
 					'url' => empty($data["url-$lc"]) ? $data['url'] : $data["url-$lc"],
 				);
-				parent::displayPublishPanel($div, $translatedData, $flagWithError, $fieldnamePrefix, $fieldnamePostfix);
-				$input = $div->getChild(0);
-				if ($flagWithError) {
-					$input = $input->getChild(0);
-				}
-				$input = $input->getChildByName('input', 0);
-				$input->setAttribute('name', $input->getAttribute('name') . "[$lc]");
+				parent::displayPublishPanel($div, $translatedData, $flagWithError, $fieldnamePrefix, $fieldnamePostfix . "[$lc]");
 				$container->appendChild($div);
 			}
 			
