@@ -8,6 +8,10 @@
 
 	class extension_multilingual_oembed_field extends Extension {
 
+		private static $appendedHeaders = 0;
+		const PUBLISH_HEADERS = 1;
+		const SETTINGS_HEADERS = 2;
+
 		/**
 		 * Name of the extension
 		 * @var string
@@ -19,6 +23,33 @@
 		 */
 		private static function requireoEmbed() {
 			require_once(EXTENSIONS . '/multilingual_oembed_field/fields/field.multilingual_oembed.php');
+		}
+
+		/**
+		 * Add headers to the page.
+		 *
+		 * @param $type
+		 */
+		static public function appendHeaders($type) {
+			if (
+				(self::$appendedHeaders & $type) !== $type
+				&& class_exists('Administration')
+				&& Administration::instance() instanceof Administration
+				&& Administration::instance()->Page instanceof HTMLPage
+			) {
+				$page = Administration::instance()->Page;
+
+				if ($type === self::PUBLISH_HEADERS) {
+					$page->addStylesheetToHead(URL . '/extensions/multilingual_oembed_field/assets/multilingual_oembed_field.publish.css', 'screen');
+					$page->addScriptToHead(URL . '/extensions/multilingual_oembed_field/assets/multilingual_oembed_field.publish.js');
+				}
+				
+				if ($type === self::SETTINGS_HEADERS) {
+					$page->addScriptToHead(URL . '/extensions/multilingual_oembed_field/assets/multilingual_oembed_field.settings.js');
+				}
+
+				self::$appendedHeaders &= $type;
+			}
 		}
 
 		/* ********* INSTALL/UPDATE/UNISTALL ******* */

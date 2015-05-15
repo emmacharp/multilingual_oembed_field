@@ -1,0 +1,7 @@
+.field-multilingual-oembed .invalid .tab-panel label > div {
+	color: #222;
+}
+
+.field-multilingual-oembed .invalid .tab-panel label > div > i {
+	color: #a9a9a9;
+}

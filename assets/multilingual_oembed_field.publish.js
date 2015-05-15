@@ -1,0 +1,4 @@
+(function ($, undefined) {
+
+
+})(this.jQuery);

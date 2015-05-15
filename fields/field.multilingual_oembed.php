@@ -386,6 +386,7 @@
 		 */
 		public function displayPublishPanel(&$wrapper, $data=NULL, $flagWithError=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL) {
 			Extension_Frontend_Localisation::appendAssets();
+			extension_multilingual_oembed_field::appendHeaders(extension_multilingual_oembed_field::PUBLISH_HEADERS);
 			$main_lang = FLang::getMainLang();
 			$all_langs = FLang::getAllLangs();
 			$langs     = FLang::getLangs();
@@ -495,6 +496,7 @@
 		 * @param array $errors
 		 */
 		public function displaySettingsPanel(&$wrapper, $errors=NULL){
+			extension_multilingual_oembed_field::appendHeaders(extension_multilingual_oembed_field::SETTINGS_HEADERS);
 			
 			/* first line, label and such */
 			parent::displaySettingsPanel($wrapper, $errors);
