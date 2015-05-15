@@ -21,7 +21,7 @@
 		</author>
 	</authors>
 	<dependencies>
-		<dependency version="1.8.8">oembed_field</dependency>
+		<dependency version="1.8.9">oembed_field</dependency>
 		<dependency version="2.5">frontend_localisation</dependency>
 	</dependencies>
 	<releases>
