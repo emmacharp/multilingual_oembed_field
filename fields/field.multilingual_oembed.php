@@ -201,6 +201,7 @@
 			$missing_langs = array();
 			$messages = array();
 			$statuses = array();
+			$row = array();
 
 			foreach (FLang::getLangs() as $lc) {
 				if (!isset($field_data[$lc])) {
@@ -213,6 +214,24 @@
 				$result[$lc] = parent::processRawFieldData($data, $status, $message, $simulate, $entry_id);
 				$messages[$lc] = $message;
 				$statuses[$lc] = $status;
+				
+				$row["url-$lc"] = $data;
+				$row["res_id-$lc"] = $result[$lc]['res_id'];
+				$row["url_oembed_xml-$lc"] = $result[$lc]['url_oembed_xml'];
+				$row["oembed_xml-$lc"] = $result[$lc]['oembed_xml'];
+				$row["title-$lc"] = $result[$lc]['title'];
+				$row["thumbnail_url-$lc"] = $result[$lc]['thumbnail_url'];
+				$row["driver-$lc"] = $result[$lc]['driver'];
+				
+				if ($lc == FLang::getMainLang()) {
+					$row["url"] = $data;
+					$row["res_id"] = $result[$lc]['res_id'];
+					$row["url_oembed_xml"] = $result[$lc]['url_oembed_xml'];
+					$row["oembed_xml"] = $result[$lc]['oembed_xml'];
+					$row["title"] = $result[$lc]['title'];
+					$row["thumbnail_url"] = $result[$lc]['thumbnail_url'];
+					$row["driver"] = $result[$lc]['driver'];
+				}
 			}
 			
 			// fix output
@@ -460,6 +479,7 @@
 
 			$label_text = $this->get('label');
 			$this->set('label', null);
+			$this->set('required', true);
 			foreach ($langs as $lc) {
 				$div = new XMLElement('div', null, array(
 					'class'          => 'tab-panel tab-' . $lc,
@@ -469,8 +489,13 @@
 				$element_name = $this->get('element_name');
 				
 				$translatedData = array(
-					'title' => empty($data["title-$lc"]) ? $data['title'] : $data["title-$lc"],
-					'url' => empty($data["url-$lc"]) ? $data['url'] : $data["url-$lc"],
+					'res_id' => $data["res_id-$lc"],
+					'url_oembed_xml' => $data["url_oembed_xml-$lc"],
+					'title' => $data["title-$lc"],
+					'url' => $data["url-$lc"],
+					'oembed_xml' => $data["oembed_xml-$lc"],
+					'thumbnail_url' => $data["thumbnail_url-$lc"],
+					'driver' => $data["driver-$lc"]
 				);
 				parent::displayPublishPanel($div, $translatedData, false, $fieldnamePrefix, $fieldnamePostfix . "[$lc]");
 				$container->appendChild($div);
@@ -572,12 +597,13 @@
 		 */
 		public function prepareTableValue($data, XMLElement $link=NULL, $entry_id=NULL){
 			$lc = $this->getLang();
+			$useMain = $this->get('default_main_lang') == 'yes';
 			
 			$translatedData = array(
-				'title' => empty($data["title-$lc"]) ? $data['title'] : $data["title-$lc"],
-				'url' => empty($data["url-$lc"]) ? $data['url'] : $data["url-$lc"],
+				'title' => $useMain && empty($data["title-$lc"]) ? $data['title'] : $data["title-$lc"],
+				'url' => $useMain && empty($data["url-$lc"]) ? $data['url'] : $data["url-$lc"],
+				'thumbnail_url' => $useMain && empty($data["thumbnail_url-$lc"]) ? $data['thumbnail_url'] : $data["thumbnail_url-$lc"],
 			);
-			
 			return parent::prepareTableValue($translatedData, $link, $entry_id);
 		}
 
@@ -589,11 +615,11 @@
 		 */
 		public function prepareTextValue($data, $entry_id = null) {
 			$lc = $this->getLang();
+			$useMain = $this->get('default_main_lang') == 'yes';
 			$translatedData = array(
-				'title' => empty($data["title-$lc"]) ? $data['title'] : $data["title-$lc"],
-				'url' => empty($data["url-$lc"]) ? $data['url'] : $data["url-$lc"],
+				'title' => $useMain && empty($data["title-$lc"]) ? $data['title'] : $data["title-$lc"],
+				'url' => $useMain && empty($data["url-$lc"]) ? $data['url'] : $data["url-$lc"],
 			);
-			
 			return parent::prepareTextValue($translatedData, $entry_id);
 		}
 
