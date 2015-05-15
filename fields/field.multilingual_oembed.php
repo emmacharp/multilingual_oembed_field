@@ -402,18 +402,8 @@
 			$required_languages = $this->getRequiredLanguages();
 			
 			$required = in_array('all', $required_languages) || count($langs) == count($required_languages);
-			
-			$append_dash = false;
-			if ((integer) $this->get('text_length') > 0) {
-				$optional = __('$1 of $2 remaining');
-				$append_dash = true;
-			}
 
 			if (!$required) {
-				if ($append_dash) {
-					$optional .= ' &ndash; ';
-				}
-				
 				if (empty($required_languages)) {
 					$optional .= __('All languages are optional');
 				} else {
@@ -467,6 +457,8 @@
 			/*  Panels  */
 			/*------------------------------------------------------------------------------------------------*/
 
+			$label_text = $this->get('label');
+			$this->set('label', null);
 			foreach ($langs as $lc) {
 				$div = new XMLElement('div', null, array(
 					'class'          => 'tab-panel tab-' . $lc,
@@ -479,16 +471,17 @@
 					'title' => empty($data["title-$lc"]) ? $data['title'] : $data["title-$lc"],
 					'url' => empty($data["url-$lc"]) ? $data['url'] : $data["url-$lc"],
 				);
-				parent::displayPublishPanel($div, $translatedData, $flagWithError, $fieldnamePrefix, $fieldnamePostfix . "[$lc]");
+				parent::displayPublishPanel($div, $translatedData, false, $fieldnamePrefix, $fieldnamePostfix . "[$lc]");
 				$container->appendChild($div);
 			}
+			$this->set('label', $label_text);
 			
 			/*------------------------------------------------------------------------------------------------*/
 			/*  Errors  */
 			/*------------------------------------------------------------------------------------------------*/
 
-			if ($error != null) {
-				$wrapper->appendChild(Widget::Error($container, $error));
+			if ($flagWithError != null) {
+				$wrapper->appendChild(Widget::Error($container, $flagWithError));
 			}
 			else {
 				$wrapper->appendChild($container);
