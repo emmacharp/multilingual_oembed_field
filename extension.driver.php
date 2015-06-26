@@ -64,12 +64,24 @@
 			return true;
 		}
 
+		protected static function checkDependencyVersion($depname, $version) {
+			$installedVersion = ExtensionManager::fetchInstalledVersion($depname);
+			if (version_compare($installedVersion, $version) == -1) {
+				Administration::instance()->Page->pageAlert("Extension `$depname` must have version $version or newer.", Alert::ERROR);
+				return false;
+			}
+			return true;
+		}
+
 		/**
 		 * Creates the table needed for the settings of the field
 		 */
 		public function install() {
 			// depends on "oembed_field"
 			if (!static::checkDependency('oembed_field')) {
+				return false;
+			}
+			if (!static::checkDependencyVersion('oembed_field', '1.8.9')) {
 				return false;
 			}
 			// depends on "languages"
