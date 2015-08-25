@@ -372,7 +372,7 @@
 				$lc = FLang::getLangCode();
 
 				// If value is empty for this language, load value from main language
-				if ($this->get('default_main_lang') == 'yes' && empty($data["value-$lc"])) {
+				if ($this->get('default_main_lang') == 'yes' && empty($data["url-$lc"])) {
 					$lc = FLang::getMainLang();
 				}
 
