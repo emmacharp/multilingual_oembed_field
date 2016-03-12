@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<extension id="multilingual_oembed_field" status="released" xmlns="http://symphony-cms.com/schemas/extension/1.0">
-	<name>Multilingual oEmbed Field</name>
+<extension id="multilingual_oembed_field" status="released" xmlns="http://getsymphony.com/schemas/extension/1.0">
+	<name>Field: Multilingual oEmbed</name>
 	<description>
 	A multilingual version of the oembed_field extension
 	
 	Easily embed videos/images from ANY* website that implements the oEmbed format. See http://oembed.com and https://github.com/Solutions-Nitriques/oembed_field
 	</description>
 	<repo type="github">https://github.com/DeuxHuitHuit/multilingual_oembed_field</repo>
-	<url type="discuss">http://symphony-cms.com/discuss/thread/110407/</url>
+	<url type="discuss">http://www.getsymphony.com/discuss/thread/110407/</url>
 	<url type="issues">https://github.com/DeuxHuitHuit/multilingual_oembed_field/issues</url>
 	<types>
 		<type>Field</type>
@@ -25,6 +25,9 @@
 		<dependency version="2.5">frontend_localisation</dependency>
 	</dependencies>
 	<releases>
+		<release version="1.0.3" date="2016-03-13" min="2.5.0" max="2.x.x">
+			- Updated compatibility info
+		</release>
 		<release version="1.0.2" date="2015-08-25" min="2.5.0" max="2.6.x">
 			- Fixed a bug where the default language value was always returned in data sources
 		</release>
