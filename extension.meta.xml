@@ -3,7 +3,7 @@
 	<name>Field: Multilingual oEmbed</name>
 	<description>
 	A multilingual version of the oembed_field extension
-	
+
 	Easily embed videos/images from ANY* website that implements the oEmbed format. See http://oembed.com and https://github.com/Solutions-Nitriques/oembed_field
 	</description>
 	<repo type="github">https://github.com/DeuxHuitHuit/multilingual_oembed_field</repo>
@@ -25,6 +25,9 @@
 		<dependency version="2.5">frontend_localisation</dependency>
 	</dependencies>
 	<releases>
+		<release version="2.0.0" date="TBA" min="4.0.0" max="4.x.x">
+			- Update for Symphony 4.x
+		</release>
 		<release version="1.1.1" date="2017-11-07" min="2.5.0" max="2.x.x">
 			- PHP 7 Support
 		</release>
