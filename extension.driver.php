@@ -45,7 +45,7 @@ class extension_multilingual_oembed_field extends Extension
                 $page->addStylesheetToHead(URL . '/extensions/multilingual_oembed_field/assets/multilingual_oembed_field.publish.css', 'screen');
                 $page->addScriptToHead(URL . '/extensions/multilingual_oembed_field/assets/multilingual_oembed_field.publish.js');
             }
-            
+
             if ($type === self::SETTINGS_HEADERS) {
                 $page->addScriptToHead(URL . '/extensions/multilingual_oembed_field/assets/multilingual_oembed_field.settings.js');
             }
@@ -100,9 +100,9 @@ class extension_multilingual_oembed_field extends Extension
         self::requireoEmbed();
         $create = FieldMultilingual_oembed::createFieldTable();
         return $create;
-        
+
     }
-    
+
     /**
      * Creates the table needed for the settings of the field
      */
@@ -112,7 +112,7 @@ class extension_multilingual_oembed_field extends Extension
         $ret = true;
         return $ret;
     }
-    
+
     /**
      *
      * Drops the table needed for the settings of the field
@@ -124,7 +124,7 @@ class extension_multilingual_oembed_field extends Extension
         return $field;
     }
 
-    
+
 
     /*------------------------------------------------------------------------------------------------*/
     /*  Delegates  */
