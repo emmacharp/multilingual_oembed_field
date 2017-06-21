@@ -123,4 +123,138 @@ class extension_multilingual_oembed_field extends Extension
         $field = FieldMultilingual_oembed::deleteFieldTable();
         return $field;
     }
+
+    
+
+    /*------------------------------------------------------------------------------------------------*/
+    /*  Delegates  */
+    /*------------------------------------------------------------------------------------------------*/
+
+    public function getSubscribedDelegates()
+    {
+        return array(
+            array(
+                'page'     => '/system/preferences/',
+                'delegate' => 'AddCustomPreferenceFieldsets',
+                'callback' => 'dAddCustomPreferenceFieldsets'
+            ),
+            array(
+                'page'     => '/system/preferences/',
+                'delegate' => 'Save',
+                'callback' => 'dSave'
+            ),
+            array(
+                'page'     => '/extensions/frontend_localisation/',
+                'delegate' => 'FLSavePreferences',
+                'callback' => 'dFLSavePreferences'
+            ),
+        );
+    }
+
+
+
+    /*------------------------------------------------------------------------------------------------*/
+    /*  System preferences  */
+    /*------------------------------------------------------------------------------------------------*/
+
+    /**
+     * Display options on Preferences page.
+     *
+     * @param array $context
+     */
+    public function dAddCustomPreferenceFieldsets($context)
+    {
+        $group = new XMLElement('fieldset');
+        $group->setAttribute('class', 'settings');
+        $group->appendChild(new XMLElement('legend', __(self::EXT_NAME)));
+
+        $label = Widget::Label(__('Consolidate entry data'));
+        $label->appendChild(Widget::Input('settings[multilingual_oembed][consolidate]', 'yes', 'checkbox', array('checked' => 'checked')));
+        $group->appendChild($label);
+        $group->appendChild(new XMLElement('p', __('Check this field if you want to consolidate database by <b>keeping</b> entry values of removed/old Language Driver language codes. Entry values of current language codes will not be affected.'), array('class' => 'help')));
+
+        $context['wrapper']->appendChild($group);
+    }
+
+    /**
+     * Edits the preferences to be saved
+     *
+     * @param array $context
+     */
+    public function dSave($context) {
+        // prevent the saving of the values
+        unset($context['settings']['multilingual_oembed']);
+    }
+
+    /**
+     * Save options from Preferences page
+     *
+     * @param array $context
+     */
+    public function dFLSavePreferences($context)
+    {
+        self::requireoEmbed();
+        if ($fields = Symphony::Database()->fetch(sprintf("SELECT `field_id` FROM `%s`", FieldMultilingual_oembed::FIELD_TBL_NAME))) {
+            $new_languages = $context['new_langs'];
+
+            // Foreach field check multilanguage values foreach language
+            foreach ($fields as $field) {
+                $entries_table = "tbl_entries_data_{$field["field_id"]}";
+
+                try {
+                    $current_columns = Symphony::Database()->fetch("SHOW COLUMNS FROM `$entries_table` LIKE 'url-%';");
+                } catch (DatabaseException $dbe) {
+                    // Field doesn't exist. Better remove it's settings
+                    Symphony::Database()->query(sprintf(
+                            "DELETE FROM `%s` WHERE `field_id` = %s;",
+                            FieldMultilingual_oembed::FIELD_TBL_NAME, $field['field_id'])
+                    );
+                    continue;
+                }
+
+                $valid_columns = array();
+
+                // Remove obsolete fields
+                if ($current_columns) {
+                    $consolidate = $_POST['settings']['multilingual_oembed']['consolidate'] === 'yes';
+
+                    foreach ($current_columns as $column) {
+                        $column_name = $column['Field'];
+
+                        $lc = str_replace('url-', '', $column_name);
+
+                        // If not consolidate option AND column lang_code not in supported languages codes -> drop Column
+                        if (!$consolidate && !in_array($lc, $new_languages)) {
+                            Symphony::Database()->query(
+                                "ALTER TABLE `$entries_table`
+                                    DROP COLUMN `res_id-{$lc}`,
+                                    DROP COLUMN `url-{$lc}`,
+                                    DROP COLUMN `url_oembed_xml-{$lc}`,
+                                    DROP COLUMN `title-{$lc}`,
+                                    DROP COLUMN `thumbnail_url-{$lc}`,
+                                    DROP COLUMN `oembed_xml-{$lc}`,
+                                    DROP COLUMN `driver-{$lc}`;"
+                            );
+                        }
+                        else {
+                            $valid_columns[] = $column_name;
+                        }
+                    }
+                }
+
+                // Add new fields
+                foreach ($new_languages as $lc) {
+                    // if columns for language don't exist, create them
+                    if (!in_array("url-$lc", $valid_columns)) {
+                        Symphony::Database()->query(
+                            "ALTER TABLE `$entries_table` " .
+                                trim(implode('', array_map(function ($item) {
+                                    return 'ADD COLUMN ' . $item;
+                                }, FieldMultilingual_oembed::generateTableColumns(array($lc)))), ',')
+                        );
+                    }
+                }
+            }
+        }
+    }
 }

@@ -649,10 +649,13 @@ class FieldMultilingual_oembed extends FieldOembed
 
     /* ********* SQL Data Definition ************* */
 
-    public static function generateTableColumns()
+    public static function generateTableColumns($langs = null)
     {
         $cols = array();
-        foreach (FLang::getLangs() as $lc) {
+        if (!is_array($langs)) {
+            $langs = FLang::getLangs();
+        }
+        foreach ($langs as $lc) {
             $cols[] = "`res_id-{$lc}`           varchar(128), ";
             $cols[] = "`url-{$lc}`              text, ";
             $cols[] = "`url_oembed_xml-{$lc}`   text, ";
