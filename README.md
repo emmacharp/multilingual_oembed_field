@@ -1,6 +1,6 @@
 # Field: Multilingual oEmbed #
 
-Version: 1.0.x
+Version: 1.1.x
 
 > A multilingual version of the oembed_field extension
 
@@ -49,4 +49,4 @@ un-wanted behavior.
 
 Made with love in Montréal by [Deux Huit Huit](https://deuxhuithuit.com)
 
-Copyright (c) 2015
+Copyright (c) 2015-2017
