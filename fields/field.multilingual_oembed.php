@@ -355,7 +355,7 @@ class FieldMultilingual_oembed extends FieldOembed
      * @param $wrapper
      * @param $data
      */
-    public function appendFormattedElement(&$wrapper, $data, $encode = false, $mode = null)
+    public function appendFormattedElement(XMLElement &$wrapper, $data, $encode = false, $mode = null, $entry_id = null)
     {
         // all-languages
         $all_languages = strpos($mode, 'all-languages');
@@ -419,7 +419,7 @@ class FieldMultilingual_oembed extends FieldOembed
      * @param string $fieldnamePrefix
      * @param string $fieldnamePostfix
      */
-    public function displayPublishPanel(&$wrapper, $data = null, $flagWithError = null, $fieldnamePrefix = null, $fieldnamePostfix = null)
+    public function displayPublishPanel(XMLElement &$wrapper, $data = null, $flagWithError = null, $fieldnamePrefix = null, $fieldnamePostfix = null, $entry_id = null)
     {
         Extension_Frontend_Localisation::appendAssets();
         extension_multilingual_oembed_field::appendHeaders(extension_multilingual_oembed_field::PUBLISH_HEADERS);
@@ -551,7 +551,7 @@ class FieldMultilingual_oembed extends FieldOembed
      * @param XMLElement $wrapper
      * @param array $errors
      */
-    public function displaySettingsPanel(&$wrapper, $errors = null)
+    public function displaySettingsPanel(XMLElement &$wrapper, $errors = null)
     {
         extension_multilingual_oembed_field::appendHeaders(extension_multilingual_oembed_field::SETTINGS_HEADERS);
         
@@ -670,13 +670,13 @@ class FieldMultilingual_oembed extends FieldOembed
             $langs = FLang::getLangs();
         }
         foreach ($langs as $lc) {
-            $cols[] = "`res_id-{$lc}`           varchar(128), ";
-            $cols[] = "`url-{$lc}`              text, ";
-            $cols[] = "`url_oembed_xml-{$lc}`   text, ";
-            $cols[] = "`title-{$lc}`            text, ";
-            $cols[] = "`thumbnail_url-{$lc}`    text, ";
-            $cols[] = "`oembed_xml-{$lc}`       text, ";
-            $cols[] = "`driver-{$lc}`           varchar(50),";
+            $cols[] = "`res_id-{$lc}`           VARCHAR(128), ";
+            $cols[] = "`url-{$lc}`              TEXT, ";
+            $cols[] = "`url_oembed_xml-{$lc}`   TEXT, ";
+            $cols[] = "`title-{$lc}`            TEXT, ";
+            $cols[] = "`thumbnail_url-{$lc}`    TEXT, ";
+            $cols[] = "`oembed_xml-{$lc}`       TEXT, ";
+            $cols[] = "`driver-{$lc}`           VARCHAR(50),";
         }
         return $cols;
     }
@@ -699,16 +699,16 @@ class FieldMultilingual_oembed extends FieldOembed
 
         $query = "
             CREATE TABLE IF NOT EXISTS `tbl_entries_data_{$field_id}` (
-                `id` int(11)        unsigned NOT NULL auto_increment,
-                `entry_id`          int(11) unsigned NOT NULL,
-                `res_id`            varchar(128),
-                `url`               varchar(2048),
-                `url_oembed_xml`    varchar(2048),
-                `title`             varchar(2048),
-                `thumbnail_url`     varchar(2048),
-                `oembed_xml`        text,
-                `dateCreated`       timestamp DEFAULT CURRENT_TIMESTAMP,
-                `driver`            varchar(50),";
+                `id` INT(11)        UNSIGNED NOT NULL AUTO_INCREMENT,
+                `entry_id`          INT(11) UNSIGNED NOT NULL,
+                `res_id`            VARCHAR(128),
+                `url`               VARCHAR(2048),
+                `url_oembed_xml`    VARCHAR(2048),
+                `title`             VARCHAR(2048),
+                `thumbnail_url`     VARCHAR(2048),
+                `oembed_xml`        TEXT,
+                `dateCreated`       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                `driver`            VARCHAR(50),";
 
         $query .= implode('', self::generateTableColumns());
 
@@ -734,17 +734,17 @@ class FieldMultilingual_oembed extends FieldOembed
         $tbl = self::FIELD_TBL_NAME;
         return Symphony::Database()->query("
             CREATE TABLE IF NOT EXISTS `$tbl` (
-                `id`                    int(11) unsigned NOT NULL auto_increment,
-                `field_id`              int(11) unsigned NOT NULL,
-                `refresh`               int(11) unsigned NULL,
-                `driver`                varchar(250) NOT NULL,
-                `unique`                enum('yes','no') NOT NULL DEFAULT 'no',
-                `thumbs`                enum('yes','no') NOT NULL DEFAULT 'no',
-                `query_params`          varchar(1024) NULL,
-                `force_ssl`             enum('yes','no') NOT NULL DEFAULT 'no',
-                `unique_media`          enum('yes','no') NOT NULL DEFAULT 'no',
+                `id`                    INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+                `field_id`              INT(11) UNSIGNED NOT NULL,
+                `refresh`               INT(11) UNSIGNED NULL,
+                `driver`                VARCHAR(250) NOT NULL,
+                `unique`                ENUM('yes','no') NOT NULL DEFAULT 'no',
+                `thumbs`                ENUM('yes','no') NOT NULL DEFAULT 'no',
+                `query_params`          VARCHAR(1024) NULL,
+                `force_ssl`             ENUM('yes','no') NOT NULL DEFAULT 'no',
+                `unique_media`          ENUM('yes','no') NOT NULL DEFAULT 'no',
                 `default_main_lang`     ENUM('yes', 'no') DEFAULT 'no',
-                `required_languages`    varchar(255) DEFAULT NULL,
+                `required_languages`    VARCHAR(255) DEFAULT NULL,
                 PRIMARY KEY (`id`),
                 UNIQUE KEY `field_id` (`field_id`)
             )  ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
