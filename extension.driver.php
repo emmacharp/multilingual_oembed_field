@@ -169,7 +169,7 @@ class extension_multilingual_oembed_field extends Extension
         $group->appendChild(new XMLElement('legend', __(self::EXT_NAME)));
 
         $label = Widget::Label(__('Consolidate entry data'));
-        $label->appendChild(Widget::Input('settings[multilingual_oembed][consolidate]', 'yes', 'checkbox', array('checked' => 'checked')));
+        $label->prependChild(Widget::Input('settings[multilingual_oembed][consolidate]', 'yes', 'checkbox', array('checked' => 'checked')));
         $group->appendChild($label);
         $group->appendChild(new XMLElement('p', __('Check this field if you want to consolidate database by <b>keeping</b> entry values of removed/old Language Driver language codes. Entry values of current language codes will not be affected.'), array('class' => 'help')));
 
