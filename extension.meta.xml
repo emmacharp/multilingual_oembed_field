@@ -25,6 +25,9 @@
 		<dependency version="2.5">frontend_localisation</dependency>
 	</dependencies>
 	<releases>
+		<release version="1.1.1" date="2017-11-07" min="2.5.0" max="2.x.x">
+			- PHP 7 Support
+		</release>
 		<release version="1.1.0" date="2017-06-20" min="2.5.0" max="2.x.x">
 			- Add delegates to add/remove language columns
 			- Handle errors better in the front end
