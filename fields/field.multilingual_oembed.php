@@ -9,6 +9,9 @@ if (!defined('__IN_SYMPHONY__')) die('<h2>Symphony Error</h2><p>You cannot direc
 require_once(EXTENSIONS . '/oembed_field/fields/field.oembed.php');
 require_once(EXTENSIONS . '/frontend_localisation/lib/class.FLang.php');
 
+require_once EXTENSIONS . '/oembed_field/lib/class.entryqueryoembedadapter.php';
+require_once EXTENSIONS . '/multilingual_oembed_field/lib/class.entryquerymultilingualoembedadapter.php';
+
 /**
  *
  * Field class that will represent an Multilingual oEmbed resource
@@ -32,6 +35,8 @@ class FieldMultilingual_oembed extends FieldOembed
     {
         // call the parent constructor
         parent::__construct();
+        // set the EQFA
+        $this->entryQueryFieldAdapter = new EntryQueryMultilingualoEmbedAdapter($this);
         // set the name of the field
         $this->_name = __('Multilingual oEmbed Resource');
     }
