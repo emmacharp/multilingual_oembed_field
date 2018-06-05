@@ -170,20 +170,26 @@ class FieldMultilingual_oembed extends FieldOembed
     {
         $id = $this->get('field_id');
 
-        $query = "
-            SELECT count(`id`) as `c` FROM `tbl_entries_data_$id`
-            WHERE (`url` = '$url'
-        ";
+        $q = Symphony::Database()
+            ->select(['count(id)' => 'c'])
+            ->from('tbl_entries_data_' . $id);
+        $urls = array();
+
         foreach (FLang::getLangs() as $lc) {
-            $query .= " OR `url-$lc` = '$url' ";
+            $urls['url-' . $lc] = $url;
         }
-        $query .= ')';
+
+        $q->where(['or' => [
+            array_merge(['url' => $url], $urls)
+        ]]);
 
         if ($entry_id != null) {
-            $query .= " AND `entry_id` != $entry_id";
+            $q->where(['entry_id' => ['!=' => $entry_id]]);
         }
 
-        $count = Symphony::Database()->fetchVar('c', 0, $query);
+        $count = $q
+            ->execute()
+            ->variable('c');
 
         return $count == null || $count == 0;
     }
@@ -331,18 +337,15 @@ class FieldMultilingual_oembed extends FieldOembed
         $tbl = self::FIELD_TBL_NAME;
 
         // return if the SQL command was successful
-        return Symphony::Database()->query(sprintf("
-            UPDATE
-                `$tbl`
-            SET
-                `default_main_lang` = '%s',
-                `required_languages` = '%s'
-            WHERE
-                `field_id` = '%s';",
-            $default_main_lang === 'yes' ? 'yes' : 'no',
-            implode(',', $required_languages),
-            $id
-        ));
+        return Symphony::Database()
+            ->update($tbl)
+            ->set([
+                'default_main_lang' => $default_main_lang === 'yes' ? 'yes' : 'no',
+                'required_languages' => implode(',', $required_languages),
+            ])
+            ->where(['field_id' => $id])
+            ->execute()
+            ->success();
     }
 
 
@@ -670,13 +673,34 @@ class FieldMultilingual_oembed extends FieldOembed
             $langs = FLang::getLangs();
         }
         foreach ($langs as $lc) {
-            $cols[] = "`res_id-{$lc}`           VARCHAR(128), ";
-            $cols[] = "`url-{$lc}`              TEXT, ";
-            $cols[] = "`url_oembed_xml-{$lc}`   TEXT, ";
-            $cols[] = "`title-{$lc}`            TEXT, ";
-            $cols[] = "`thumbnail_url-{$lc}`    TEXT, ";
-            $cols[] = "`oembed_xml-{$lc}`       TEXT, ";
-            $cols[] = "`driver-{$lc}`           VARCHAR(50),";
+            $cols['res_id-' . $lc] = [
+                'type' => 'varchar(128)',
+                'null' => true,
+            ];
+            $cols['url-' . $lc] = [
+                'type' => 'text',
+                'null' => true,
+            ];
+            $cols['url_oembed_xml-' . $lc] = [
+                'type' => 'text',
+                'null' => true,
+            ];
+            $cols['title-' . $lc] = [
+                'type' => 'text',
+                'null' => true,
+            ];
+            $cols['thumbnail_url-' . $lc] = [
+                'type' => 'text',
+                'null' => true,
+            ];
+            $cols['oembed_xml-' . $lc] = [
+                'type' => 'text',
+                'null' => true,
+            ];
+            $cols['driver-' . $lc] = [
+                'type' => 'varchar(50)',
+                'null' => true,
+            ];
         }
         return $cols;
     }
@@ -685,7 +709,7 @@ class FieldMultilingual_oembed extends FieldOembed
     {
         $keys = array();
         foreach (FLang::getLangs() as $lc) {
-            $keys[] = "KEY `res_id-{$lc}` (`res_id-{$lc}`),";
+            $keys['res_id-' . $lc] = 'key';
         }
         return $keys;
     }
@@ -695,35 +719,36 @@ class FieldMultilingual_oembed extends FieldOembed
      */
     public function createTable()
     {
-        $field_id = $this->get('id');
-
-        $query = "
-            CREATE TABLE IF NOT EXISTS `tbl_entries_data_{$field_id}` (
-                `id` INT(11)        UNSIGNED NOT NULL AUTO_INCREMENT,
-                `entry_id`          INT(11) UNSIGNED NOT NULL,
-                `res_id`            VARCHAR(128),
-                `url`               VARCHAR(2048),
-                `url_oembed_xml`    VARCHAR(2048),
-                `title`             VARCHAR(2048),
-                `thumbnail_url`     VARCHAR(2048),
-                `oembed_xml`        TEXT,
-                `dateCreated`       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                `driver`            VARCHAR(50),";
-
-        $query .= implode('', self::generateTableColumns());
-
-        $query .= "
-                PRIMARY KEY (`id`),
-                UNIQUE KEY `entry_id` (`entry_id`),";
-
-        $query .= implode('', self::generateTableKeys());
-
-        $query .= " KEY `res_id` (`res_id`)";
-
-        $query .= "
-            ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-
-        return Symphony::Database()->query($query);
+        return Symphony::Database()
+            ->create('tbl_entries_data_' . $this->get('id'))
+            ->ifNotExists()
+            ->charset('utf8')
+            ->collate('utf8_unicode_ci')
+            ->fields(array_merge([
+                'id' => [
+                    'type' => 'int(11)',
+                    'auto' => true,
+                ],
+                'entry_id' => 'int(11)',
+                'res_id' => 'varchar(128)',
+                'url' => 'varchar(2048)',
+                'url_oembed_xml' => 'varchar(2048)',
+                'title' => 'varchar(2048)',
+                'thumbnail_url' => 'varchar(2048)',
+                'oembed_xml' => 'text',
+                'dateCreated' => [
+                    'type' => 'timestamp',
+                    'default' => 'current_timestamp',
+                ],
+                'driver' => 'varchar(50)',
+            ], self::generateTableColumns()))
+            ->keys(array_merge([
+                'id' => 'primary',
+                'entry_id' => 'unique',
+                'res_id' => 'key',
+            ], self::generateTableKeys()))
+            ->execute()
+            ->success();
     }
 
     /**
@@ -731,24 +756,63 @@ class FieldMultilingual_oembed extends FieldOembed
      */
     public static function createFieldTable()
     {
-        $tbl = self::FIELD_TBL_NAME;
-        return Symphony::Database()->query("
-            CREATE TABLE IF NOT EXISTS `$tbl` (
-                `id`                    INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
-                `field_id`              INT(11) UNSIGNED NOT NULL,
-                `refresh`               INT(11) UNSIGNED NULL,
-                `driver`                VARCHAR(250) NOT NULL,
-                `unique`                ENUM('yes','no') NOT NULL DEFAULT 'no',
-                `thumbs`                ENUM('yes','no') NOT NULL DEFAULT 'no',
-                `query_params`          VARCHAR(1024) NULL,
-                `force_ssl`             ENUM('yes','no') NOT NULL DEFAULT 'no',
-                `unique_media`          ENUM('yes','no') NOT NULL DEFAULT 'no',
-                `default_main_lang`     ENUM('yes', 'no') DEFAULT 'no',
-                `required_languages`    VARCHAR(255) DEFAULT NULL,
-                PRIMARY KEY (`id`),
-                UNIQUE KEY `field_id` (`field_id`)
-            )  ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-        ");
+
+        return Symphony::Database()
+            ->create(self::FIELD_TBL_NAME)
+            ->ifNotExists()
+            ->charset('utf8')
+            ->collate('utf8_unicode_ci')
+            ->fields([
+                'id' => [
+                    'type' => 'int(11)',
+                    'auto' => true,
+                ],
+                'field_id' => 'int(11)',
+                'refresh' => [
+                    'type' => 'int(11)',
+                    'null' => true,
+                ],
+                'driver' => 'varchar(250)',
+                'unique' => [
+                    'type' => 'enum',
+                    'values' => ['yes','no'],
+                    'default' => 'no',
+                ],
+                'thumbs' => [
+                    'type' => 'enum',
+                    'values' => ['yes','no'],
+                    'default' => 'no',
+                ],
+                'query_params' => [
+                    'type' => 'varchar(2014)',
+                    'null' => true,
+                ],
+                'force_ssl' => [
+                    'type' => 'enum',
+                    'values' => ['yes','no'],
+                    'default' => 'no',
+                ],
+                'unique_media' => [
+                    'type' => 'enum',
+                    'values' => ['yes','no'],
+                    'default' => 'no',
+                ],
+                'default_main_lang' => [
+                    'type' => 'enum',
+                    'values' => ['yes','no'],
+                    'default' => 'no',
+                ],
+                'required_languages' => [
+                    'type' => 'varchar(255)',
+                    'null' => true,
+                ],
+            ])
+            ->keys([
+                'id' => 'primary',
+                'field_id' => 'unique',
+            ])
+            ->execute()
+            ->success();
     }
 
     /**
@@ -757,10 +821,11 @@ class FieldMultilingual_oembed extends FieldOembed
      */
     public static function deleteFieldTable()
     {
-        $tbl = self::FIELD_TBL_NAME;
-        return Symphony::Database()->query("
-            DROP TABLE IF EXISTS `$tbl`
-        ");
+        return Symphony::Database()
+            ->drop(self::FIELD_TBL_NAME)
+            ->ifExists()
+            ->execute()
+            ->success();
     }
 
 }

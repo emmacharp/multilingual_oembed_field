@@ -58,9 +58,10 @@ class extension_multilingual_oembed_field extends Extension
 
     protected static function checkDependency($depname)
     {
-        $status = ExtensionManager::fetchStatus(array('handle' => $depname));
+        $status = Symphony::ExtensionManager()->fetchStatus(array('handle' => $depname));
         $status = current($status);
-        if ($status != EXTENSION_ENABLED) {
+
+        if ($status != Extension::EXTENSION_ENABLED) {
             Administration::instance()->Page->pageAlert("Could not load `$depname` extension.", Alert::ERROR);
             return false;
         }
@@ -194,7 +195,12 @@ class extension_multilingual_oembed_field extends Extension
     public function dFLSavePreferences($context)
     {
         self::requireoEmbed();
-        if ($fields = Symphony::Database()->fetch(sprintf("SELECT `field_id` FROM `%s`", FieldMultilingual_oembed::FIELD_TBL_NAME))) {
+        if ($fields = Symphony::Database()
+            ->select(['field_id'])
+            ->from(FieldMultilingual_oembed::FIELD_TBL_NAME)
+            ->execute()
+            ->rows()
+        ) {
             $new_languages = $context['new_langs'];
 
             // Foreach field check multilanguage values foreach language
@@ -202,13 +208,20 @@ class extension_multilingual_oembed_field extends Extension
                 $entries_table = "tbl_entries_data_{$field["field_id"]}";
 
                 try {
-                    $current_columns = Symphony::Database()->fetch("SHOW COLUMNS FROM `$entries_table` LIKE 'url-%';");
+                    $current_columns = Symphony::Database()
+                        ->showColumns()
+                        ->from($entries_table)
+                        ->like('url-%')
+                        ->execute()
+                        ->success();
                 } catch (DatabaseException $dbe) {
                     // Field doesn't exist. Better remove it's settings
-                    Symphony::Database()->query(sprintf(
-                            "DELETE FROM `%s` WHERE `field_id` = %s;",
-                            FieldMultilingual_oembed::FIELD_TBL_NAME, $field['field_id'])
-                    );
+                    Symphony::Database()
+                        ->delete(FieldMultilingual_oembed::FIELD_TBL_NAME)
+                        ->where(['field_id' => $field['field_id']])
+                        ->execute()
+                        ->success();
+
                     continue;
                 }
 
@@ -225,16 +238,19 @@ class extension_multilingual_oembed_field extends Extension
 
                         // If not consolidate option AND column lang_code not in supported languages codes -> drop Column
                         if (!$consolidate && !in_array($lc, $new_languages)) {
-                            Symphony::Database()->query(
-                                "ALTER TABLE `$entries_table`
-                                    DROP COLUMN `res_id-{$lc}`,
-                                    DROP COLUMN `url-{$lc}`,
-                                    DROP COLUMN `url_oembed_xml-{$lc}`,
-                                    DROP COLUMN `title-{$lc}`,
-                                    DROP COLUMN `thumbnail_url-{$lc}`,
-                                    DROP COLUMN `oembed_xml-{$lc}`,
-                                    DROP COLUMN `driver-{$lc}`;"
-                            );
+                            Symphony::Dabatase()
+                                ->alter($entries_table)
+                                ->drop([
+                                    'res_id-' . $lc,
+                                    'url-' . $lc,
+                                    'url_oembed_xml-' . $lc,
+                                    'title-' . $lc,
+                                    'thumbnail_url-' . $lc,
+                                    'oembed_xml-' . $lc,
+                                    'driver-' . $lc,
+                                ])
+                                ->execute()
+                                ->success();
                         }
                         else {
                             $valid_columns[] = $column_name;
@@ -246,12 +262,11 @@ class extension_multilingual_oembed_field extends Extension
                 foreach ($new_languages as $lc) {
                     // if columns for language don't exist, create them
                     if (!in_array("url-$lc", $valid_columns)) {
-                        Symphony::Database()->query(
-                            "ALTER TABLE `$entries_table` " .
-                                trim(implode('', array_map(function ($item) {
-                                    return 'ADD COLUMN ' . $item;
-                                }, FieldMultilingual_oembed::generateTableColumns(array($lc)))), ',')
-                        );
+                        Symphony::Database()
+                            ->alter($entries_table)
+                            ->add(FieldMultilingual_oembed::generateTableColumns())
+                            ->execute()
+                            ->success();
                     }
                 }
             }
