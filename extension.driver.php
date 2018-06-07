@@ -213,7 +213,7 @@ class extension_multilingual_oembed_field extends Extension
                         ->from($entries_table)
                         ->like('url-%')
                         ->execute()
-                        ->success();
+                        ->rows();
                 } catch (DatabaseException $dbe) {
                     // Field doesn't exist. Better remove it's settings
                     Symphony::Database()
