@@ -435,14 +435,6 @@ class FieldMultilingual_oembed extends FieldOembed
         $all_langs = FLang::getAllLangs();
         $langs     = FLang::getLangs();
 
-        $errors = !$flagWithError ? array() : array_reduce(explode('.', $flagWithError), function ($carry, $item) {
-            $matches = array();
-            if (preg_match('/\[([a-z]+)\] (.+)/', $item, $matches) === 1) {
-                $carry[trim($matches[1])] = trim($matches[2]);
-            }
-            return $carry;
-        }, array());
-
         $wrapper->setAttribute('class', $wrapper->getAttribute('class') . ' field-multilingual field-oembed field-multilingual-oembed');
         $container = new XMLElement('div', null, array('class' => 'container'));
 
@@ -533,7 +525,7 @@ class FieldMultilingual_oembed extends FieldOembed
             parent::displayPublishPanel(
                 $div,
                 $translatedData,
-                !isset($errors[$lc]) ? null : $errors[$lc],
+                null,
                 $fieldnamePrefix,
                 $fieldnamePostfix . "[$lc]"
             );
