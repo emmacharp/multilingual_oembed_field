@@ -41,11 +41,6 @@ class extension_multilingual_oembed_field extends Extension
         ) {
             $page = Administration::instance()->Page;
 
-            if ($type === self::PUBLISH_HEADERS) {
-                $page->addStylesheetToHead(URL . '/extensions/multilingual_oembed_field/assets/multilingual_oembed_field.publish.css', 'screen');
-                $page->addScriptToHead(URL . '/extensions/multilingual_oembed_field/assets/multilingual_oembed_field.publish.js');
-            }
-
             if ($type === self::SETTINGS_HEADERS) {
                 $page->addScriptToHead(URL . '/extensions/multilingual_oembed_field/assets/multilingual_oembed_field.settings.js');
             }
