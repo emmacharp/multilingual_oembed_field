@@ -436,7 +436,6 @@ class FieldMultilingual_oembed extends FieldOembed
         $langs     = FLang::getLangs();
 
         $wrapper->setAttribute('class', $wrapper->getAttribute('class') . ' field-multilingual field-oembed field-multilingual-oembed');
-        $container = new XMLElement('div', null, array('class' => 'container'));
 
         /*------------------------------------------------------------------------------------------------*/
         /*  Label  */
@@ -484,19 +483,25 @@ class FieldMultilingual_oembed extends FieldOembed
             }
         }
 
-        $container->appendChild($label);
+
+        if ($flagWithError != null) {
+            $wrapper->appendChild(Widget::Error($label, $flagWithError));
+        }
+        else {
+            $wrapper->appendChild($label);
+        }
 
         /*------------------------------------------------------------------------------------------------*/
         /*  Tabs  */
         /*------------------------------------------------------------------------------------------------*/
 
-        $ul = new XMLElement('ul', null, array('class' => 'tabs'));
+        $ul = new XMLElement('ul', null, array('class' => 'tabs multilingualtabs'));
         foreach ($langs as $lc) {
             $li = new XMLElement('li', $lc, array('class' => $lc));
             $lc === $main_lang ? $ul->prependChild($li) : $ul->appendChild($li);
         }
 
-        $container->appendChild($ul);
+        $wrapper->appendChild($ul);
 
         /*------------------------------------------------------------------------------------------------*/
         /*  Panels  */
@@ -529,7 +534,7 @@ class FieldMultilingual_oembed extends FieldOembed
                 $fieldnamePrefix,
                 $fieldnamePostfix . "[$lc]"
             );
-            $container->appendChild($div);
+            $wrapper->appendChild($div);
         }
         $this->set('label', $label_text);
 
@@ -537,12 +542,6 @@ class FieldMultilingual_oembed extends FieldOembed
         /*  Errors  */
         /*------------------------------------------------------------------------------------------------*/
 
-        if ($flagWithError != null) {
-            $wrapper->appendChild(Widget::Error($container, $flagWithError));
-        }
-        else {
-            $wrapper->appendChild($container);
-        }
     }
 
     /**
